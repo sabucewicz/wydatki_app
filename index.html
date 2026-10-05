@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mój Budżet</title>
+  <title>Wydatki miesięczne</title>
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#121316" />
@@ -52,12 +52,6 @@
       font-size: 1.4rem;
       font-weight: 700;
       letter-spacing: -0.3px;
-    }
-
-    header p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 4px;
     }
 
     /* Karta kategorii */
@@ -234,12 +228,6 @@
 
     .modal-box h2 {
       font-size: 1.15rem;
-      margin-bottom: 4px;
-    }
-
-    .modal-box p {
-      color: var(--text-muted);
-      font-size: 0.85rem;
       margin-bottom: 16px;
     }
 
@@ -304,22 +292,20 @@
 
   <div class="container">
     <header>
-      <h1>Portfel & Limity</h1>
-      <p>Kliknij „+”, aby odjąć wydatek od kategorii</p>
+      <h1>Wydatki miesięczne</h1>
     </header>
 
     <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
 
     <button class="btn-reset" onclick="resetLimits()">
-      ↺ Resetuj limity na nowy miesiąc
+      Resetuj
     </button>
   </div>
 
   <!-- Modal do wpisywania wydatku -->
   <div class="modal-backdrop" id="expense-modal">
     <div class="modal-box">
-      <h2 id="modal-title">Dodaj wydatek</h2>
-      <p id="modal-subtitle">Wpisz kwotę, którą wydałeś</p>
+      <h2 id="modal-title">Dodanie kwoty: </h2>
 
       <div class="input-wrapper">
         <input 
@@ -342,9 +328,9 @@
 
   <script>
     const INITIAL_CONFIG = [
+      { id: "jedzenie", name: "Jedzenie", icon: "🍔", limit: 1000 },
       { id: "dojazdy", name: "Dojazdy", icon: "🚌", limit: 250 },
       { id: "studia", name: "Studia", icon: "🎓", limit: 800 },
-      { id: "jedzenie", name: "Jedzenie", icon: "🍔", limit: 1000 },
       { id: "mieszkanie", name: "Mieszkanie", icon: "🏠", limit: 800 },
       { id: "inne", name: "Inne", icon: "📦", limit: 500 }
     ];
@@ -407,8 +393,7 @@
     function openModal(catId) {
       activeCatId = catId;
       const cat = INITIAL_CONFIG.find(c => c.id === catId);
-      document.getElementById("modal-title").textContent = `Dodaj wydatek: ${cat.name}`;
-      document.getElementById("modal-subtitle").textContent = `Zmniejszy limit z ${cat.limit} zł`;
+      document.getElementById("modal-title").textContent = `Dodanie kwoty: ${cat.name}`;
       
       const input = document.getElementById("expense-amount");
       input.value = "";
@@ -434,13 +419,12 @@
       }
     }
 
-    // Zatwierdzanie Enterem w polu kwoty
     document.getElementById("expense-amount").addEventListener("keydown", (e) => {
       if (e.key === "Enter") applyExpense();
     });
 
     function resetLimits() {
-      if (confirm("Czy na pewno chcesz zresetować wydatki i odnowić pełne limity na nowy miesiąc?")) {
+      if (confirm("Czy na pewno chcesz zresetować limity?")) {
         spentData = {};
         saveState();
       }
