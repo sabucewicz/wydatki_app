@@ -1,0 +1,11 @@
+{
+  "name": "wydatki-miesieczne",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "check": "node --check js/budget.js && node --check js/app.js && node --check sw.js",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
