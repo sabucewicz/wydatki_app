@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mój Budżet</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#121316" />
+  <style>
+    :root {
+      --bg: #101216;
+      --card-bg: #1a1d24;
+      --card-border: #282c37;
+      --text-main: #f0f2f5;
+      --text-muted: #8b949e;
+      --accent: #3b82f6;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 18px 16px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    header {
+      padding: 10px 4px 6px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Karta kategorii */
+    .category-row {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .row-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cat-icon {
+      font-size: 1.4rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cat-info h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .cat-info span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .row-right {
+      text-align: right;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .remaining-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .remaining-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .remaining-val {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .remaining-val.warning {
+      color: var(--warning);
+    }
+
+    .remaining-val.danger {
+      color: var(--danger);
+    }
+
+    .btn-add {
+      background: var(--accent);
+      color: white;
+      border: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+
+    .btn-add:active {
+      transform: scale(0.92);
+      background: #2563eb;
+    }
+
+    /* Pasek postępu */
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: var(--success);
+      border-radius: 99px;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* Przycisk resetu */
+    .btn-reset {
+      margin-top: 14px;
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn-reset:active {
+      background: rgba(239, 68, 68, 0.22);
+      transform: scale(0.98);
+    }
+
+    /* Modal / Okienko wprowadzania */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 999;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #1e222b;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px 32px;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.5);
+      animation: slideUp 0.2s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-box h2 {
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+    }
+
+    .modal-box p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 16px 45px 16px 16px;
+      border-radius: 14px;
+      background: #14171d;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      font-size: 1.4rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--accent);
+    }
+
+    .input-wrapper .suffix {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-modal {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .btn-confirm {
+      background: var(--accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Portfel & Limity</h1>
+      <p>Kliknij „+”, aby odjąć wydatek od kategorii</p>
+    </header>
+
+    <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+    <button class="btn-reset" onclick="resetLimits()">
+      ↺ Resetuj limity na nowy miesiąc
+    </button>
+  </div>
+
+  <!-- Modal do wpisywania wydatku -->
+  <div class="modal-backdrop" id="expense-modal">
+    <div class="modal-box">
+      <h2 id="modal-title">Dodaj wydatek</h2>
+      <p id="modal-subtitle">Wpisz kwotę, którą wydałeś</p>
+
+      <div class="input-wrapper">
+        <input 
+          type="number" 
+          id="expense-amount" 
+          step="0.01" 
+          inputmode="decimal" 
+          placeholder="0.00" 
+          autofocus 
+        />
+        <span class="suffix">zł</span>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal btn-cancel" onclick="closeModal()">Anuluj</button>
+        <button class="btn-modal btn-confirm" onclick="applyExpense()">Zatwierdź</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const INITIAL_CONFIG = [
+      { id: "dojazdy", name: "Dojazdy", icon: "🚌", limit: 250 },
+      { id: "studia", name: "Studia", icon: "🎓", limit: 800 },
+      { id: "jedzenie", name: "Jedzenie", icon: "🍔", limit: 1000 },
+      { id: "mieszkanie", name: "Mieszkanie", icon: "🏠", limit: 800 },
+      { id: "inne", name: "Inne", icon: "📦", limit: 500 }
+    ];
+
+    const STORAGE_KEY = "budget_spent_data_v1";
+    let spentData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    let activeCatId = null;
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(spentData));
+      render();
+    }
+
+    function render() {
+      const container = document.getElementById("categories-container");
+      container.innerHTML = "";
+
+      INITIAL_CONFIG.forEach(cat => {
+        const spent = spentData[cat.id] || 0;
+        const remaining = cat.limit - spent;
+        const percentLeft = Math.max(0, Math.min(100, (remaining / cat.limit) * 100));
+
+        let statusClass = "";
+        let barColor = "var(--success)";
+        if (remaining <= 0) {
+          statusClass = "danger";
+          barColor = "var(--danger)";
+        } else if (remaining < cat.limit * 0.25) {
+          statusClass = "warning";
+          barColor = "var(--warning)";
+        }
+
+        const card = document.createElement("div");
+        card.className = "category-row";
+        card.innerHTML = `
+          <div class="row-top">
+            <div class="row-left">
+              <div class="cat-icon">${cat.icon}</div>
+              <div class="cat-info">
+                <h3>${cat.name}</h3>
+                <span>Limit: ${cat.limit} zł</span>
+              </div>
+            </div>
+            <div class="row-right">
+              <div class="remaining-box">
+                <span class="remaining-label">Zostało</span>
+                <span class="remaining-val ${statusClass}">${remaining.toFixed(2).replace(".00", "")} zł</span>
+              </div>
+              <button class="btn-add" onclick="openModal('${cat.id}')">+</button>
+            </div>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${percentLeft}%; background-color: ${barColor};"></div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openModal(catId) {
+      activeCatId = catId;
+      const cat = INITIAL_CONFIG.find(c => c.id === catId);
+      document.getElementById("modal-title").textContent = `Dodaj wydatek: ${cat.name}`;
+      document.getElementById("modal-subtitle").textContent = `Zmniejszy limit z ${cat.limit} zł`;
+      
+      const input = document.getElementById("expense-amount");
+      input.value = "";
+      document.getElementById("expense-modal").classList.add("open");
+      setTimeout(() => input.focus(), 80);
+    }
+
+    function closeModal() {
+      document.getElementById("expense-modal").classList.remove("open");
+      activeCatId = null;
+    }
+
+    function applyExpense() {
+      const input = document.getElementById("expense-amount");
+      const val = parseFloat(input.value.replace(",", "."));
+
+      if (!isNaN(val) && val > 0 && activeCatId) {
+        spentData[activeCatId] = (spentData[activeCatId] || 0) + val;
+        saveState();
+        closeModal();
+      } else {
+        input.focus();
+      }
+    }
+
+    // Zatwierdzanie Enterem w polu kwoty
+    document.getElementById("expense-amount").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") applyExpense();
+    });
+
+    function resetLimits() {
+      if (confirm("Czy na pewno chcesz zresetować wydatki i odnowić pełne limity na nowy miesiąc?")) {
+        spentData = {};
+        saveState();
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
