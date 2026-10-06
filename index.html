@@ -246,8 +246,10 @@
       background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(4px);
       justify-content: center;
-      align-items: flex-end;
+      align-items: flex-start;
+      padding: 24px 16px;
       z-index: 999;
+      overflow-y: auto;
     }
 
     .modal-backdrop.open {
@@ -258,17 +260,18 @@
       background: #1e222b;
       width: 100%;
       max-width: 480px;
-      max-height: 90vh;
+      max-height: 85vh;
       overflow-y: auto;
-      border-radius: 24px 24px 0 0;
-      padding: 24px 20px 32px;
-      box-shadow: 0 -8px 30px rgba(0,0,0,0.5);
-      animation: slideUp 0.2s ease-out;
+      border-radius: 20px;
+      padding: 24px 20px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+      animation: slideDown 0.2s ease-out;
+      margin-top: env(safe-area-inset-top, 10px);
     }
 
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     .modal-box h2 {
@@ -520,7 +523,6 @@
       { id: "inne", name: "Inne", icon: "📦", limit: 500 }
     ];
 
-    // Pobieranie stanu z Cookies
     let categories = getCookie("app_categories") || DEFAULT_CATEGORIES;
     let spentData = getCookie("app_spent_data") || {};
     let activeCatId = null;
@@ -531,7 +533,6 @@
       render();
     }
 
-    // Renderowanie kafelków
     function render() {
       const container = document.getElementById("categories-container");
       container.innerHTML = "";
@@ -622,7 +623,7 @@
       if (e.key === "Enter") applyExpense();
     });
 
-    // --- MODAL USTAWIEŃ (DODAWANIE / USUWANIE KATEGORII) ---
+    // --- MODAL USTAWIEŃ ---
     function openSettingsModal() {
       renderSettingsList();
       document.getElementById("settings-modal").classList.add("open");
