@@ -130,11 +130,6 @@
       word-break: break-word;
     }
 
-    .cat-info span {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
     .row-right {
       text-align: right;
       display: flex;
@@ -574,7 +569,6 @@
               <div class="cat-icon">${cat.icon || "💳"}</div>
               <div class="cat-info">
                 <h3>${escapeHtml(cat.name)}</h3>
-                <span>Limit: ${cat.limit.toFixed(2).replace(".00", "")} zł</span>
               </div>
             </div>
             <div class="row-right">
@@ -636,7 +630,6 @@
 
     function closeSettingsModal() {
       document.getElementById("settings-modal").classList.remove("open");
-      // Wyczyszczenie formularza
       document.getElementById("new-cat-name").value = "";
       document.getElementById("new-cat-limit").value = "";
       document.getElementById("new-cat-icon").value = "";
@@ -700,7 +693,6 @@
       saveState();
       renderSettingsList();
 
-      // Czyszczenie pól po dodaniu
       nameInput.value = "";
       limitInput.value = "";
       iconInput.value = "";
@@ -731,13 +723,11 @@
       return div.innerHTML;
     }
 
-    // Zamknięcie modali przy kliknięciu w tło
     window.addEventListener("click", (e) => {
       if (e.target.id === "expense-modal") closeExpenseModal();
       if (e.target.id === "settings-modal") closeSettingsModal();
     });
 
-    // Start
     render();
   </script>
   <script>
