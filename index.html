@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#09090b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Prywatny tracker miesięcznych wydatków działający lokalnie i offline (PWA).">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Wydatki miesięczne</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="topbar-title-wrap">
+        <p id="month-label" class="topbar-kicker">Budżet</p>
+        <h1 class="topbar-title">Wydatki miesięczne</h1>
+      </div>
+      <div class="topbar-actions">
+        <button id="export-csv-btn" type="button" class="icon-btn" aria-label="Eksportuj wydatki do CSV" title="Eksportuj CSV">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span class="icon-btn-label">CSV</span>
+        </button>
+        <button id="open-settings-btn" type="button" class="icon-btn" aria-label="Ustawienia kategorii" title="Ustawienia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+          <span class="icon-btn-label">Ustawienia</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="summary-card" aria-label="Podsumowanie miesięczne">
+      <div class="summary-top">
+        <div>
+          <p class="summary-label">Zostało w budżecie</p>
+          <p id="summary-balance" class="summary-balance tabular">0 zł</p>
+        </div>
+        <span id="summary-pill" class="status-pill is-ok">Wykorzystano 0%</span>
+      </div>
+      <div class="progress-track">
+        <div id="summary-bar" class="progress-fill is-ok"></div>
+      </div>
+      <div class="summary-meta tabular">
+        <span id="summary-spent">Wydano 0 zł</span>
+        <span id="summary-limit">Budżet 0 zł</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="categories-heading">
+      <div class="section-header">
+        <h2 id="categories-heading" class="section-title">Kategorie</h2>
+        <span id="categories-count" class="section-meta">0 kat.</span>
+      </div>
+      <div id="categories-list" class="categories-list"></div>
+    </section>
+
+    <section aria-labelledby="transactions-heading">
+      <div class="section-header">
+        <h2 id="transactions-heading" class="section-title">Ostatnie wydatki</h2>
+        <span id="transactions-meta" class="section-meta">0 wpisów</span>
+      </div>
+      <div id="transactions-container" class="transactions-card"></div>
+    </section>
+  </main>
+
+  <!-- Modal: dodaj wydatek -->
+  <div id="add-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="add-modal-title" hidden>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="add-modal-title" class="modal-title">Dodaj wydatek</h2>
+        <button type="button" class="modal-close" data-close-modal aria-label="Zamknij">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <form id="add-form" class="form-stack" novalidate>
+        <div class="field">
+          <label for="expense-amount" class="field-label">Kwota (PLN)</label>
+          <input id="expense-amount" type="text" inputmode="decimal" class="input input--amount" placeholder="0,00" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="expense-note" class="field-label">Notatka (opcjonalnie)</label>
+          <input id="expense-note" type="text" class="input" maxlength="60" placeholder="np. Zakupy, bilet miesięczny">
+        </div>
+        <p id="add-error" class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-close-modal>Anuluj</button>
+          <button type="submit" class="btn btn-primary">Dodaj wydatek</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: ustawienia kategorii i reset miesiąca -->
+  <div id="settings-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" hidden>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="settings-modal-title" class="modal-title">Ustawienia kategorii</h2>
+        <button type="button" class="modal-close" data-close-modal aria-label="Zamknij">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="new-cat-form" class="form-stack" novalidate>
+        <div class="field">
+          <span class="field-label">Nowa kategoria</span>
+          <div class="input-row">
+            <input id="new-cat-name" type="text" class="input" maxlength="30" placeholder="Nazwa (np. Zdrowie)">
+            <input id="new-cat-limit" type="text" inputmode="decimal" class="input" style="max-width: 112px;" placeholder="Limit zł">
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label">Ikona</span>
+          <div id="emoji-picker" class="emoji-picker" role="group" aria-label="Wybierz ikonę kategorii"></div>
+        </div>
+        <p id="settings-error" class="form-error" role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary">Dodaj kategorię</button>
+      </form>
+
+      <div class="settings-divider"></div>
+
+      <div class="settings-section">
+        <span class="field-label">Obecne kategorie i limity (PLN)</span>
+        <div id="settings-cat-list" class="settings-cat-list"></div>
+      </div>
+
+      <div class="settings-divider"></div>
+
+      <div class="settings-section">
+        <button id="open-reset-confirm-btn" type="button" class="btn btn-danger">Wyzeruj wydatki miesiąca</button>
+        <div id="reset-confirm-box" class="reset-confirm-box" hidden>
+          <p class="reset-confirm-text">Usunąć wszystkie wydatki z bieżącego miesiąca? Kategorie i limity zostaną zachowane.</p>
+          <div class="modal-actions">
+            <button id="cancel-reset-btn" type="button" class="btn btn-secondary btn-sm">Anuluj</button>
+            <button id="confirm-reset-btn" type="button" class="btn btn-danger btn-sm">Potwierdź reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <span id="toast-message" class="toast-message"></span>
+    <button id="toast-undo-btn" type="button" class="toast-action" hidden>Cofnij</button>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
